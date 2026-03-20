@@ -34,7 +34,7 @@
 
 <form method="POST">
 
-<textarea name="about_content"></textarea>
+<textarea name="about_cont"></textarea>
 
 <br><br>
 
