@@ -3,46 +3,84 @@ include("layout/header.php");
 include("layout/sidebar.php");
 include("../includes/db.php");
 
-if(isset($_POST['save'])){
+/* DELETE */
+if(isset($_GET['delete'])){
+$id = intval($_GET['delete']);
+mysqli_query($conn,"DELETE FROM events WHERE id=$id");
+header("Location: events.php");
+exit();
+}
 
-$title=$_POST['title'];
-$description=$_POST['description'];
-$date=$_POST['date'];
+/* ADD EVENT */
+if(isset($_POST['add'])){
 
-$query="INSERT INTO events(title,description,event_date)
-VALUES('$title','$description','$date')";
+$title = $_POST['title'];
+$desc = $_POST['description'];
 
-mysqli_query($conn,$query);
+$image = $_FILES['image']['name'];
+$tmp = $_FILES['image']['tmp_name'];
 
-echo "Event Added";
+move_uploaded_file($tmp,"../uploads/".$image);
 
+mysqli_query($conn,"INSERT INTO events(title,description,image)
+VALUES('$title','$desc','$image')");
+
+header("Location: events.php");
+exit();
 }
 ?>
 
 <div class="content">
 
-<h2>Add Event</h2>
+<h2>Manage Events</h2>
 
-<form method="POST">
+<form method="POST" enctype="multipart/form-data">
 
-<label>Event Title</label>
-<input type="text" name="title">
-
+<input type="text" name="title" placeholder="Event Title" required>
 <br><br>
 
-<label>Description</label>
-<textarea name="description"></textarea>
-
+<textarea name="description" placeholder="Event Description"></textarea>
 <br><br>
 
-<label>Event Date</label>
-<input type="date" name="date">
-
+<input type="file" name="image">
 <br><br>
 
-<button name="save">Add Event</button>
+<button name="add">Add Event</button>
 
 </form>
+
+<hr>
+
+<div class="image-grid">
+
+<?php
+$res = mysqli_query($conn,"SELECT * FROM events ORDER BY id DESC");
+
+while($row=mysqli_fetch_assoc($res)){
+?>
+
+<div class="image-card">
+
+<img src="../uploads/<?php echo $row['image']; ?>">
+
+<h4><?php echo $row['title']; ?></h4>
+
+<p><?php echo substr($row['description'],0,60); ?>...</p>
+
+<a href="edit_event.php?id=<?php echo $row['id']; ?>">
+<button>Edit</button>
+</a>
+
+<a href="events.php?delete=<?php echo $row['id']; ?>"
+onclick="return confirm('Delete this event?')">
+<button class="delete-btn">Delete</button>
+</a>
+
+</div>
+
+<?php } ?>
+
+</div>
 
 </div>
 
